@@ -1,9 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Header, Hero, Institutional, Services, Process, Footer } from '../components/LandingSections';
-import { ContactSection } from '../components/ContactSection';
 import { useMutation } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from '../context/AuthContext';
 import { useApi } from '../hooks/useApi';
+import { Header, Hero, Institutional, Services, Process, ContactSection, Footer } from '../components/LandingSections';
 import { LoginModal } from '../components/LoginModal';
 import { TestWizard } from '../components/TestWizard';
 import { PatientDashboard, SpecialistDashboard } from '../components/Dashboards';
@@ -31,30 +30,12 @@ const AppContent = () => {
     consentimento_pesquisa: false
   });
 
-  const [activeSection, setActiveSection] = useState('inicio');
-
   const isAuthenticated = Boolean(token);
 
-  // AppContent (dentro do componente)
   const educationalLinks = useMemo(() => ([
-    {
-      label: 'Guia TEA Ministério da Saúde',
-      href: 'https://www.gov.br/saude/pt-br/assuntos/autismo',
-      icon: '📘',
-      desc: 'Materiais oficiais do Ministério da Saúde sobre TEA: diretrizes, direitos e orientações práticas para familiares e profissionais.'
-    },
-    {
-      label: 'ADOS-2 - Pearson',
-      href: 'https://www.bloomy.com.br/blog/ados-2',
-      icon: '📘',
-      desc: 'Protocolo observacional ADOS-2: módulos, faixas etárias, aplicação clínica e interpretação dos resultados.'
-    },
-    {
-      label: 'ADI-R - WPS',
-      href: 'https://genialcare.com.br/blog/entrevista-diagnostica-estruturada-adi-r/?nab=0',
-      icon: '📘',
-      desc: 'Entrevista diagnóstica estruturada ADI-R: estrutura, domínios avaliados e quando utilizar em conjunto com o ADOS-2.'
-    }
+    { label: 'Guia TEA Ministério da Saúde', href: 'https://www.gov.br/saude/pt-br/assuntos/autismo' },
+    { label: 'ADOS-2 - Pearson', href: 'https://www.pearsonassessments.com' },
+    { label: 'ADI-R - WPS', href: 'https://www.wpspublish.com/adi-r-autism-diagnostic-interview-revised.html' }
   ]), []);
 
   const handleLogout = () => {
@@ -101,45 +82,6 @@ const AppContent = () => {
     registerTestado.reset();
   }, [testadoForm.documento_cpf]);
 
-  // Observe sections to update active nav link
-  useEffect(() => {
-    const targets = [
-      { id: 'hero', key: 'inicio' },
-      { id: 'sobre', key: 'sobre' },
-      { id: 'servicos', key: 'servicos' },
-      { id: 'processo', key: 'processo' },
-      { id: 'contato', key: 'contato' },
-    ];
-
-    const elements = targets
-      .map((t) => ({ ...t, el: document.getElementById(t.id) }))
-      .filter((t) => t.el);
-
-    if (!elements.length) return;
-
-    let current = 'inicio';
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-        if (visible) {
-          const match = elements.find((e) => e.el === visible.target);
-          const next = match?.key || 'inicio';
-          if (next !== current) {
-            current = next;
-            setActiveSection(next);
-          }
-        }
-      },
-      { root: null, rootMargin: '0px 0px -60% 0px', threshold: [0.25, 0.5, 0.75] }
-    );
-
-    elements.forEach(({ el }) => observer.observe(el));
-    setActiveSection('inicio');
-
-    return () => observer.disconnect();
-  }, []);
   return (
     <>
       <Header
@@ -147,39 +89,31 @@ const AppContent = () => {
         isAuthenticated={isAuthenticated}
         role={profile?.role}
         onLogout={handleLogout}
-        activeSection={activeSection}
       />
       <Hero />
       <section className="section" id="educacao">
-      <div className="container">
-        <h2 className="section-title">Conteúdos educativos</h2>
-        <p className="section-subtitle">
-          Estudos, artigos e protocolos de referência mundial sobre TEA.
-        </p>
-
-        <div className="resources-grid">
-          {educationalLinks.map((item) => (
-            <article key={item.href} className="card resource-card">
-              <div className="resource-head">
-                <div className="resource-icon">{item.icon}</div>
+        <div className="container">
+          <h2 className="section-title">Conteúdos educativos</h2>
+          <p className="section-subtitle">Estudos, artigos e protocolos de referência mundial sobre TEA.</p>
+          <div className="grid cards-grid">
+            {educationalLinks.map((item) => (
+              <article key={item.href} className="card">
                 <h3>{item.label}</h3>
-              </div>
-
-              {/* Cada card com seu próprio texto */}
-              <p>{item.desc}</p>
-
-              <a className="btn btn-primary" href={item.href} target="_blank" rel="noreferrer">
-                Acessar recurso
-              </a>
-            </article>
-          ))}
+                <p style={{ marginTop: '0.75rem', lineHeight: 1.6 }}>
+                  Conheça materiais aprofundados para compreender o espectro autista, protocolos ADOS-2 e ADI-R e orientações para famílias.
+                </p>
+                <a className="btn btn-primary" href={item.href} target="_blank" rel="noreferrer">
+                  Acessar recurso
+                </a>
+              </article>
+            ))}
+          </div>
         </div>
-      </div>
-    </section>
-
+      </section>
       <Institutional />
       <Services />
       <Process />
+      <TeamSection />
 
       {isAuthenticated && profile?.role === 'responsavel' && (
         <section className="section" id="testes">
@@ -246,6 +180,29 @@ const AppContent = () => {
       )}
 
       {testFlowActive && <TestWizard cpf={cpfSelecionado} onClose={handleTestFinish} />}
+
+      <section className="section" id="importacao">
+        <div className="container">
+          <h2 className="section-title">Importação de dados</h2>
+          <p className="section-subtitle">Envie planilhas para visualizar dashboards interativas de indicadores TEA.</p>
+          <div className="grid cards-grid">
+            <article className="card">
+              <h3>Responsáveis</h3>
+              <p style={{ margin: '0.75rem 0', lineHeight: 1.6 }}>
+                Faça upload de planilhas Excel com hábitos, rotinas ou evolução da criança para gerar gráficos personalizados.
+              </p>
+              <input type="file" accept=".xlsx,.xls,.csv" />
+            </article>
+            <article className="card">
+              <h3>Especialistas</h3>
+              <p style={{ margin: '0.75rem 0', lineHeight: 1.6 }}>
+                Combine dados internos com bases do IBGE para análises geográficas, dashboards de barras e mapas temáticos.
+              </p>
+              <input type="file" accept=".xlsx,.xls,.csv" />
+            </article>
+          </div>
+        </div>
+      </section>
 
       {isAuthenticated && <DashboardArea cpf={profile?.role === 'responsavel' ? cpfSelecionado : undefined} role={profile?.role} />}
 

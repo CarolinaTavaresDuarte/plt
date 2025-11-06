@@ -359,3 +359,146 @@ header.sticky-nav {
     padding: 3rem 1rem;
   }
 }
+/* Ensure service cards align buttons at the bottom */
+.card.card--service {
+  display: flex;
+  flex-direction: column;
+}
+.card.card--service .btn {
+  margin-top: auto;
+  align-self: flex-start;
+}
+
+/* === Institutional (Sobre) – layout em card, imagem à direita === */
+.institutional-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 32px;
+  display: grid;
+  grid-template-columns: 1.2fr 1fr; /* texto maior que a imagem */
+  align-items: center;
+  gap: 32px;
+}
+
+.institutional-copy .section-title {
+  margin-bottom: 16px;
+}
+
+.institutional-p {
+  line-height: 1.8;
+  margin-bottom: 16px;
+  color: #0f172a;
+}
+
+.institutional-figure {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.institutional-logo {
+  max-width: 360px;      /* ajuste o tamanho da logo por aqui */
+  width: 100%;
+  height: auto;
+  border-radius: 12px;   /* opcional, para combinar com o card */
+}
+
+/* Responsivo */
+@media (max-width: 960px) {
+  .institutional-card {
+    grid-template-columns: 1fr;  /* empilha no mobile */
+    padding: 24px;
+    gap: 24px;
+  }
+  .institutional-figure {
+    order: 2;                    /* imagem abaixo do texto no mobile */
+  }
+}
+
+/* ===== Educational Resources ===== */
+.section#educacao {
+  background: linear-gradient(180deg, #fff 0%, #f8fafc 100%);
+}
+
+.resources-grid {
+  display: grid;
+  gap: 22px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 1024px) {
+  .resources-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+  .resources-grid { grid-template-columns: 1fr; }
+}
+
+.card.resource-card {
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem 1.5rem 1.25rem;
+  border: 1px solid rgba(2, 6, 23, .06);
+  box-shadow: 0 12px 28px rgba(2, 6, 23, 0.06);
+}
+
+.resource-head {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  margin-bottom: .5rem;
+}
+
+.resource-icon {
+  flex: 0 0 40px;
+  width: 40px; height: 40px;
+  border-radius: 999px;
+  display: grid; place-items: center;
+  background: rgba(0, 123, 255, .12);
+  color: #007bff;
+  font-size: 1.1rem;
+}
+
+.resource-card h3 {
+  font-size: 1.125rem;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.resource-card p {
+  color: #334155;
+  line-height: 1.7;
+  margin: .5rem 0 1rem;
+}
+
+.resource-meta {
+  font-size: .875rem;
+  color: #64748b;
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+
+.card.resource-card .btn {
+  margin-top: .75rem;            /* gruda o botão no “fundo” do card */
+  align-self: flex-start;
+  padding-inline: 1.1rem;
+}
+
+.card.resource-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 40px rgba(2, 6, 23, 0.10);
+  border-color: rgba(0, 123, 255, .18);
+}
+
+.resource-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* força o espaçamento entre topo e botão */
+}
+
+.resource-card .btn {
+  margin-top: auto; /* empurra o botão para o final do card */
+  align-self: flex-start;
+}

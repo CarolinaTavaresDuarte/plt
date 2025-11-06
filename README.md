@@ -32,7 +32,7 @@ frontend/  # Aplicação React responsiva (Vite)
 ```bash
 cd backend
 python -m venv venv
-source venv/bin/activate
+venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 ```
 

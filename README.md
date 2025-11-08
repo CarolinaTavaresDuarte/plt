@@ -63,6 +63,7 @@ O backend cria automaticamente os esquemas e tabelas necessários no PostgreSQL 
 ```bash
 cd frontend
 npm install
+npm i react-router-dom
 npm run dev
 ```
 

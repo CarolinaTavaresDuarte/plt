@@ -8,12 +8,12 @@ import { LoginModal } from '../components/LoginModal';
 import { TestWizard } from '../components/TestWizard';
 import { PatientDashboard, SpecialistDashboard } from '../components/Dashboards';
 
-const DashboardArea = ({ cpf, role }) => (
-  <div id="dashboard">
-    {role === 'responsavel' && <PatientDashboard cpf={cpf} />}
-    {role === 'especialista' && <SpecialistDashboard />}
-  </div>
-);
+// const DashboardArea = ({ cpf, role }) => (
+//   <div id="dashboard">
+//     {role === 'responsavel' && <PatientDashboard cpf={cpf} />}
+//     {role === 'especialista' && <SpecialistDashboard />}
+//   </div>
+// );
 
 const AppContent = () => {
   const { token, profile, setToken, setProfile } = useAuth();
@@ -247,8 +247,6 @@ const AppContent = () => {
 
       {testFlowActive && <TestWizard cpf={cpfSelecionado} onClose={handleTestFinish} />}
 
-      {isAuthenticated && <DashboardArea cpf={profile?.role === 'responsavel' ? cpfSelecionado : undefined} role={profile?.role} />}
-
       <ContactSection />
       <Footer />
 
@@ -257,11 +255,7 @@ const AppContent = () => {
   );
 };
 
-const App = () => (
-  <AuthProvider>
-    <AppContent />
-  </AuthProvider>
-);
-
-export default App;
+export default function App() {
+  return <AppContent />;
+}
 

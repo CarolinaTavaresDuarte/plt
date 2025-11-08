@@ -1,3 +1,4 @@
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 
 const services = [
@@ -51,91 +52,150 @@ const processSteps = [
   },
 ];
 
-export const Header = ({ onLoginClick, isAuthenticated, onLogout, activeSection }) => (
-  <header className="sticky-nav" id="inicio">
-    <div className="container nav-bar">
-      <a
-        href="#inicio"
-        style={{
-          color: '#ffffff',
-          fontWeight: 700,
-          fontSize: '1.25rem',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '.5rem',
-        }}
-      >
-        <img
-          src="/logo.png"
-          alt="PLATAA"
-          style={{ height: '32px' }}
-          onError={(e) => {
-            e.currentTarget.style.display = 'none';
+export const Header = ({ onLoginClick, isAuthenticated, onLogout, activeSection, role }) => {
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const isHome = pathname === "/";
+
+  // rolar até uma seção da landing (ou navegar pra home e rolar)
+  const goTo = (sectionId) => (e) => {
+    e.preventDefault();
+    const isHome = window.location.pathname === "/";
+
+    const scrollTo = () => {
+      const el = document.getElementById(sectionId);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+
+    if (isHome) {
+      scrollTo();
+    } else {
+      navigate("/", { replace: false });
+      // espera o paint da home para rolar
+      setTimeout(scrollTo, 0);
+    }
+  };
+
+  return (
+    <header className="sticky-nav" id="inicio">
+      <div className="container nav-bar">
+        {/* Logo sempre volta pra home */}
+        <NavLink
+          to="/"
+          end
+          style={{
+            color: "#ffffff",
+            fontWeight: 700,
+            fontSize: "1.25rem",
+            display: "flex",
+            alignItems: "center",
+            gap: ".5rem",
           }}
-        />
-        PLATAA
-      </a>
+        >
+          <img
+            src="/logo.png"
+            alt="PLATAA"
+            style={{ height: "32px" }}
+            onError={(e) => { e.currentTarget.style.display = "none"; }}
+          />
+          PLATAA
+        </NavLink>
 
-      <nav>
-        <ul className="nav-links">
-          <li>
-            <a href="#inicio" className={activeSection === 'inicio' ? 'active' : ''}>
-              Início
-            </a>
-          </li>
-          <li>
-            <a href="#sobre" className={activeSection === 'sobre' ? 'active' : ''}>
-              Sobre
-            </a>
-          </li>
-          <li>
-            <a href="#servicos" className={activeSection === 'servicos' ? 'active' : ''}>
-              Serviços
-            </a>
-          </li>
-          <li>
-            <a href="#processo" className={activeSection === 'processo' ? 'active' : ''}>
-              Como Funciona
-            </a>
-          </li>
-          <li>
-            <a href="#contato" className={activeSection === 'contato' ? 'active' : ''}>
-              Contato
-            </a>
-          </li>
+        <nav>
+          <ul className="nav-links">
+            {/* Home (rota) */}
+            <li>
+              {isHome ? (
+                <a
+                  href="#hero"
+                  onClick={goTo("hero")}
+                  className={activeSection === "inicio" ? "active" : ""}
+                >
+                  Início
+                </a>
+              ) : (
+                <NavLink to="/" end className={({ isActive }) => (isActive ? "active" : "")}>
+                  Início
+                </NavLink>
+              )}
+            </li>
 
-          {isAuthenticated ? (
-            <>
-              <li><a href="#dashboard">Dashboard</a></li>
+            {/* Seções da landing: viram botões que chamam goTo() */}
+            <li>
+              <a href="#sobre" onClick={goTo("sobre")}
+                 className={activeSection === "sobre" ? "active" : ""}>
+                Sobre
+              </a>
+            </li>
+            <li>
+              <a href="#servicos" onClick={goTo("servicos")}
+                 className={activeSection === "servicos" ? "active" : ""}>
+                Serviços
+              </a>
+            </li>
+            <li>
+              <a href="#processo" onClick={goTo("processo")}
+                 className={activeSection === "processo" ? "active" : ""}>
+                Como Funciona
+              </a>
+            </li>
+            <li>
+              <a href="#contato" onClick={goTo("contato")}
+                 className={activeSection === "contato" ? "active" : ""}>
+                Contato
+              </a>
+            </li>
+
+            {/* separador visual entre âncoras e rotas */}
+            <li className="nav-sep" aria-hidden="true" />
+
+            {isAuthenticated ? (
+              <>
+                {/* Triagens: só para responsável */}
+                {role === "responsavel" && (
+                  <li>
+                    <NavLink to="/triagens" className={({ isActive }) => (isActive ? "active" : "")}>
+                      Triagens
+                    </NavLink>
+                  </li>
+                )}
+
+                {/* Dashboard: para qualquer perfil logado */}
+                <li>
+                  <NavLink to="/dashboard" className={({ isActive }) => (isActive ? "active" : "")}>
+                    Dashboard
+                  </NavLink>
+                </li>
+
+                <li>
+                  <button
+                    type="button"
+                    className="btn btn-outline"
+                    onClick={onLogout}
+                    style={{ padding: "0.35rem 1rem" }}
+                  >
+                    Sair
+                  </button>
+                </li>
+              </>
+            ) : (
               <li>
                 <button
                   type="button"
-                  className="btn btn-outline"
-                  onClick={onLogout}
-                  style={{ padding: '0.35rem 1rem' }}
+                  className="btn btn-primary"
+                  onClick={onLoginClick}
+                  style={{ padding: "0.35rem 1rem" }}
                 >
-                  Sair
+                  Entrar
                 </button>
               </li>
-            </>
-          ) : (
-            <li>
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={onLoginClick}
-                style={{ padding: '0.35rem 1rem' }}
-              >
-                Entrar
-              </button>
-            </li>
-          )}
-        </ul>
-      </nav>
-    </div>
-  </header>
-);
-
+            )}
+          </ul>
+        </nav>
+      </div>
+    </header>
+  );
+};
 export const Hero = () => (
   <section
     id="hero"

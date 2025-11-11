@@ -42,6 +42,7 @@ export default function Tests() {
           testadoForm.documento_cpf.length === 11 &&
           testadoForm.regiao_bairro &&
           testadoForm.contato_telefone &&
+          String(testadoForm.contato_telefone).length === 11 &&
           testadoForm.contato_email
       ),
     [testadoForm]
@@ -154,10 +155,15 @@ export default function Tests() {
                 <input
                   id="telefone"
                   type="tel"
+                  inputMode="numeric"
+                  pattern="\\d{11}"
+                  maxLength={11}
+                  placeholder="Somente números (11 dígitos)"
                   value={testadoForm.contato_telefone}
-                  onChange={(e) =>
-                    setTestadoForm((p) => ({ ...p, contato_telefone: e.target.value }))
-                  }
+                  onChange={(e) => {
+                    const onlyDigits = (e.target.value || '').replace(/[^0-9]/g, '').slice(0, 11);
+                    setTestadoForm((p) => ({ ...p, contato_telefone: onlyDigits }));
+                  }}
                 />
               </div>
 

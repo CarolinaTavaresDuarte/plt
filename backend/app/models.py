@@ -159,3 +159,133 @@ class IndigenousAutismStatistic(Base):
     autism_count = Column(Integer, nullable=False)
     autism_percentage = Column(Float, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+# ===================== IBGE ESTATISTICAS ESTUDANTES =====================
+class IBGEStudentAutism(Base):
+    __tablename__ = "student_autism_statistics"
+    __table_args__ = {"schema": settings.ibge_data_schema}
+
+    id = Column(Integer, primary_key=True)
+    location = Column(String(255), nullable=False)
+
+    # ============================
+    # 1. Total de estudantes
+    # ============================
+    total_total = Column(Integer)
+    total_6_14 = Column(Integer)
+    total_15_17 = Column(Integer)
+    total_18_24 = Column(Integer)
+    total_25_mais = Column(Integer)
+
+    # Raça: Branca
+    branca_total = Column(Integer)
+    branca_6_14 = Column(Integer)
+    branca_15_17 = Column(Integer)
+    branca_18_24 = Column(Integer)
+    branca_25_mais = Column(Integer)
+
+    # Raça: Preta
+    preta_total = Column(Integer)
+    preta_6_14 = Column(Integer)
+    preta_15_17 = Column(Integer)
+    preta_18_24 = Column(Integer)
+    preta_25_mais = Column(Integer)
+
+    # Raça: Amarela
+    amarela_total = Column(Integer)
+    amarela_6_14 = Column(Integer)
+    amarela_15_17 = Column(Integer)
+    amarela_18_24 = Column(Integer)
+    amarela_25_mais = Column(Integer)
+
+    # Raça: Parda
+    parda_total = Column(Integer)
+    parda_6_14 = Column(Integer)
+    parda_15_17 = Column(Integer)
+    parda_18_24 = Column(Integer)
+    parda_25_mais = Column(Integer)
+
+    # Raça: Indígena
+    indigena_total = Column(Integer)
+    indigena_6_14 = Column(Integer)
+    indigena_15_17 = Column(Integer)
+    indigena_18_24 = Column(Integer)
+    indigena_25_mais = Column(Integer)
+
+    # ============================
+    # 2. Estudantes diagnosticados com autismo
+    # ============================
+    aut_total_total = Column(Integer)
+    aut_total_6_14 = Column(Integer)
+    aut_total_15_17 = Column(Integer)
+    aut_total_18_24 = Column(Integer)
+    aut_total_25_mais = Column(Integer)
+
+    aut_branca_total = Column(Integer)
+    aut_branca_6_14 = Column(Integer)
+    aut_branca_15_17 = Column(Integer)
+    aut_branca_18_24 = Column(Integer)
+    aut_branca_25_mais = Column(Integer)
+
+    aut_preta_total = Column(Integer)
+    aut_preta_6_14 = Column(Integer)
+    aut_preta_15_17 = Column(Integer)
+    aut_preta_18_24 = Column(Integer)
+    aut_preta_25_mais = Column(Integer)
+
+    aut_amarela_total = Column(Integer)
+    aut_amarela_6_14 = Column(Integer)
+    aut_amarela_15_17 = Column(Integer)
+    aut_amarela_18_24 = Column(Integer)
+    aut_amarela_25_mais = Column(Integer)
+
+    aut_parda_total = Column(Integer)
+    aut_parda_6_14 = Column(Integer)
+    aut_parda_15_17 = Column(Integer)
+    aut_parda_18_24 = Column(Integer)
+    aut_parda_25_mais = Column(Integer)
+
+    aut_indigena_total = Column(Integer)
+    aut_indigena_6_14 = Column(Integer)
+    aut_indigena_15_17 = Column(Integer)
+    aut_indigena_18_24 = Column(Integer)
+    aut_indigena_25_mais = Column(Integer)
+
+    # ============================
+    # 3. Percentual diagnosticado com autismo
+    # ============================
+    pct_total_total = Column(Float)
+    pct_total_6_14 = Column(Float)
+    pct_total_15_17 = Column(Float)
+    pct_total_18_24 = Column(Float)
+    pct_total_25_mais = Column(Float)
+
+    pct_branca_total = Column(Float)
+    pct_branca_6_14 = Column(Float)
+    pct_branca_15_17 = Column(Float)
+    pct_branca_18_24 = Column(Float)
+    pct_branca_25_mais = Column(Float)
+
+    pct_preta_total = Column(Float)
+    pct_preta_6_14 = Column(Float)
+    pct_preta_15_17 = Column(Float)
+    pct_preta_18_24 = Column(Float)
+    pct_preta_25_mais = Column(Float)
+
+    pct_amarela_total = Column(Float)
+    pct_amarela_6_14 = Column(Float)
+    pct_amarela_15_17 = Column(Float)
+    pct_amarela_18_24 = Column(Float)
+    pct_amarela_25_mais = Column(Float)
+
+    pct_parda_total = Column(Float)
+    pct_parda_6_14 = Column(Float)
+    pct_parda_15_17 = Column(Float)
+    pct_parda_18_24 = Column(Float)
+    pct_parda_25_mais = Column(Float)
+
+    pct_indigena_total = Column(Float)
+    pct_indigena_6_14 = Column(Float)
+    pct_indigena_15_17 = Column(Float)
+    pct_indigena_18_24 = Column(Float)
+    pct_indigena_25_mais = Column(Float)

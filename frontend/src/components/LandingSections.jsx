@@ -163,7 +163,7 @@ export const Header = ({ onLoginClick, isAuthenticated, onLogout, activeSection,
                 {/* Dashboard: para qualquer perfil logado */}
                 <li>
                   <NavLink to="/dashboard" className={({ isActive }) => (isActive ? "active" : "")}>
-                    Dashboard
+                    Resultados
                   </NavLink>
                 </li>
 

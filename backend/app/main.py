@@ -6,6 +6,10 @@ from app.routers import ibge
 from .config import get_settings
 import app.database as db
 from .routers import auth, platform, tests
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
+
 
 settings = get_settings()
 

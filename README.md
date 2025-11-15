@@ -25,6 +25,9 @@ frontend/  # Aplicação React responsiva (Vite)
   - `GET /api/v1/platform/metrics/platform-stats` – métricas de impacto
   - `POST /api/v1/platform/contact/submit` – formulário de contato
 
+  swagger
+  `http://localhost:8000/docs`
+  
 ### Executando localmente
 
 1. Crie um ambiente virtual e instale as dependências:

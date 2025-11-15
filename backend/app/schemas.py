@@ -172,3 +172,119 @@ class IndigenousAutismStatisticResponse(IndigenousAutismStatisticBase):
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+class IBGEStudentAutismByRaceBase(BaseModel):
+    location: str | None = None
+
+    total_total: int | None = None
+    total_6_14: int | None = None
+    total_15_17: int | None = None
+    total_18_24: int | None = None
+    total_25_mais: int | None = None
+
+    branca_total: int | None = None
+    branca_6_14: int | None = None
+    branca_15_17: int | None = None
+    branca_18_24: int | None = None
+    branca_25_mais: int | None = None
+
+    preta_total: int | None = None
+    preta_6_14: int | None = None
+    preta_15_17: int | None = None
+    preta_18_24: int | None = None
+    preta_25_mais: int | None = None
+
+    amarela_total: int | None = None
+    amarela_6_14: int | None = None
+    amarela_15_17: int | None = None
+    amarela_18_24: int | None = None
+    amarela_25_mais: int | None = None
+
+    parda_total: int | None = None
+    parda_6_14: int | None = None
+    parda_15_17: int | None = None
+    parda_18_24: int | None = None
+    parda_25_mais: int | None = None
+
+    indigena_total: int | None = None
+    indigena_6_14: int | None = None
+    indigena_15_17: int | None = None
+    indigena_18_24: int | None = None
+    indigena_25_mais: int | None = None
+
+    aut_total_total: int | None = None
+    aut_total_6_14: int | None = None
+    aut_total_15_17: int | None = None
+    aut_total_18_24: int | None = None
+    aut_total_25_mais: int | None = None
+
+    aut_branca_total: int | None = None
+    aut_branca_6_14: int | None = None
+    aut_branca_15_17: int | None = None
+    aut_branca_18_24: int | None = None
+    aut_branca_25_mais: int | None = None
+
+    aut_preta_total: int | None = None
+    aut_preta_6_14: int | None = None
+    aut_preta_15_17: int | None = None
+    aut_preta_18_24: int | None = None
+    aut_preta_25_mais: int | None = None
+
+    aut_amarela_total: int | None = None
+    aut_amarela_6_14: int | None = None
+    aut_amarela_15_17: int | None = None
+    aut_amarela_18_24: int | None = None
+    aut_amarela_25_mais: int | None = None
+
+    aut_parda_total: int | None = None
+    aut_parda_6_14: int | None = None
+    aut_parda_15_17: int | None = None
+    aut_parda_18_24: int | None = None
+    aut_parda_25_mais: int | None = None
+
+    aut_indigena_total: int | None = None
+    aut_indigena_6_14: int | None = None
+    aut_indigena_15_17: int | None = None
+    aut_indigena_18_24: int | None = None
+    aut_indigena_25_mais: int | None = None
+
+    pct_total_total: float | None = None
+    pct_total_6_14: float | None = None
+    pct_total_15_17: float | None = None
+    pct_total_18_24: float | None = None
+    pct_total_25_mais: float | None = None
+
+    pct_branca_total: float | None = None
+    pct_branca_6_14: float | None = None
+    pct_branca_15_17: float | None = None
+    pct_branca_18_24: float | None = None
+    pct_branca_25_mais: float | None = None
+
+    pct_preta_total: float | None = None
+    pct_preta_6_14: float | None = None
+    pct_preta_15_17: float | None = None
+    pct_preta_18_24: float | None = None
+    pct_preta_25_mais: float | None = None
+
+    pct_amarela_total: float | None = None
+    pct_amarela_6_14: float | None = None
+    pct_amarela_15_17: float | None = None
+    pct_amarela_18_24: float | None = None
+    pct_amarela_25_mais: float | None = None
+
+    pct_parda_total: float | None = None
+    pct_parda_6_14: float | None = None
+    pct_parda_15_17: float | None = None
+    pct_parda_18_24: float | None = None
+    pct_parda_25_mais: float | None = None
+
+    pct_indigena_total: float | None = None
+    pct_indigena_6_14: float | None = None
+    pct_indigena_15_17: float | None = None
+    pct_indigena_18_24: float | None = None
+    pct_indigena_25_mais: float | None = None
+
+
+class IBGEStudentAutismByRaceResponse(IBGEStudentAutismByRaceBase):
+    id: int
+    model_config = ConfigDict(from_attributes=True)

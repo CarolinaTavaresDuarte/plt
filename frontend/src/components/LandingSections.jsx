@@ -149,6 +149,19 @@ export const Header = ({ onLoginClick, isAuthenticated, onLogout, activeSection,
             {/* separador visual entre âncoras e rotas */}
             <li className="nav-sep" aria-hidden="true" />
 
+            {/* Novo botão Dados*/}
+            <li>
+              <NavLink
+                to="/dados"
+                className={({ isActive }) => (isActive ? "active" : "")}
+              >
+                Dados
+              </NavLink>
+            </li>
+
+            {/* separador visual entre Dados e Entrar */}
+            <li className="nav-sep" aria-hidden="true" />
+
             {isAuthenticated ? (
               <>
                 {/* Triagens: só para responsável */}

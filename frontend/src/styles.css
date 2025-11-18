@@ -658,6 +658,85 @@ header.sticky-nav {
   padding: 0.35rem 0.9rem;
   font-size: 0.92rem;
 }
+
+.patient-results-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.patient-result-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.patient-result-card__header h3 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.patient-result-card__header p {
+  margin: 0.25rem 0 0;
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+.patient-result-card__body {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.patient-result-card__entry {
+  border-top: 1px solid #eef2f7;
+  padding-top: 1rem;
+}
+
+.patient-result-card__entry:first-of-type {
+  border-top: none;
+  padding-top: 0;
+}
+
+.patient-result-card__entry-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.patient-result-card__entry-head strong {
+  font-size: 1rem;
+}
+
+.patient-result-card__entry-head small {
+  display: block;
+  color: #6b7280;
+  margin-top: 0.25rem;
+  font-size: 0.9rem;
+}
+
+.patient-result-card__orientation {
+  margin-top: 0.5rem;
+  line-height: 1.5;
+  color: #111827;
+}
+
+.risk-pill {
+  border-radius: 999px;
+  padding: 0.25rem 0.85rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+  border: 1px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
 /* Ocultar filtros antigos não funcionais (região e risco antigos) */
 label[for="filtro-regiao"],
 #filtro-regiao,

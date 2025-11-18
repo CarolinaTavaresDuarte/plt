@@ -35,6 +35,43 @@ const COLORS = {
   Baixo: '#2ea97d',
 };
 
+const TEST_NAME_MAP = {
+  mchat: 'M-CHAT-R/F',
+  assq: 'ASSQ',
+  aq10: 'AQ-10',
+  ados2: 'ADOS-2',
+  adir: 'ADI-R',
+};
+
+const RISK_BADGES = {
+  Alto: { color: '#b42318', background: 'rgba(227,77,77,.16)', borderColor: 'rgba(227,77,77,.45)' },
+  Moderado: { color: '#9c6b04', background: 'rgba(240,173,78,.16)', borderColor: 'rgba(240,173,78,.4)' },
+  Baixo: { color: '#0e7a4b', background: 'rgba(46,169,125,.16)', borderColor: 'rgba(46,169,125,.35)' },
+};
+
+const getRiskStyle = (level) => ({
+  color: RISK_BADGES[level]?.color || '#0f172a',
+  background: RISK_BADGES[level]?.background || 'rgba(15,23,42,.08)',
+  borderColor: RISK_BADGES[level]?.borderColor || 'rgba(15,23,42,.12)',
+});
+
+const getTestLabel = (type) => {
+  if (!type) return 'Teste';
+  return TEST_NAME_MAP[type] || type.toUpperCase();
+};
+
+const formatDateLabel = (value) => {
+  const d = normalizeDate(value);
+  if (!d) return '-';
+  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+};
+
+const formatCpf = (value = '') => {
+  const digits = String(value).replace(/\D/g, '');
+  if (digits.length !== 11) return value;
+  return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
+};
+
 // Internal charts component (exported as default)
 function Charts({ data = [] }) {
   const { riskCounts, ageGroups, topHoods, trend } = useMemo(() => {
@@ -445,12 +482,92 @@ export function SpecialistDashboard() {
 
 // Simple patient dashboard placeholder (can be expanded later)
 export function PatientDashboard() {
+  const api = useApi();
+  const [pacientes, setPacientes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    (async () => {
+      try {
+        const res = await api.get('/api/v1/tests/responsavel/resultados');
+        if (!active) return;
+        setPacientes(res.data?.pacientes || []);
+        setError(null);
+      } catch (err) {
+        if (!active) return;
+        setError('Não foi possível carregar seus resultados agora.');
+      } finally {
+        if (active) setLoading(false);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [api]);
+
   return (
     <section className="section" id="patient-dashboard">
       <div className="container">
         <h2 className="section-title">Meus resultados</h2>
-        <p className="section-subtitle">Acompanhe suas triagens e orientações.</p>
-        <div className="card">Área do paciente em desenvolvimento.</div>
+        <p className="section-subtitle">Acompanhe suas triagens e orientações personalizadas.</p>
+
+        {loading && <div className="card">Carregando seus resultados...</div>}
+        {error && <div className="alert alert-error">{error}</div>}
+
+        {!loading && !error && pacientes.length === 0 && (
+          <div className="card">
+            Você ainda não finalizou nenhuma triagem. Assim que concluir um teste, os resultados aparecerão aqui.
+          </div>
+        )}
+
+        {!loading && !error && pacientes.length > 0 && (
+          <div className="patient-results-grid">
+            {pacientes.map((paciente) => {
+              const latest = paciente.resultados?.[0];
+              return (
+                <article key={paciente.cpf} className="card patient-result-card">
+                  <header className="patient-result-card__header">
+                    <div>
+                      <h3>{paciente.nome}</h3>
+                      <p>
+                        {formatCpf(paciente.cpf)}
+                        {paciente.regiao_bairro ? ` · ${paciente.regiao_bairro}` : ''}
+                      </p>
+                    </div>
+                    {latest && (
+                      <span className="risk-pill" style={getRiskStyle(latest.risco)}>
+                        {latest.risco}
+                      </span>
+                    )}
+                  </header>
+
+                  <div className="patient-result-card__body">
+                    {paciente.resultados.map((resultado, idx) => (
+                      <div key={`${paciente.cpf}-${resultado.teste_tipo}-${idx}`} className="patient-result-card__entry">
+                        <div className="patient-result-card__entry-head">
+                          <div>
+                            <strong>{getTestLabel(resultado.teste_tipo)}</strong>
+                            <small>
+                              {formatDateLabel(resultado.data)}
+                              {typeof resultado.score === 'number' ? ` · Score ${resultado.score}` : ''}
+                            </small>
+                          </div>
+                          <span className="risk-pill" style={getRiskStyle(resultado.risco)}>
+                            {resultado.risco}
+                          </span>
+                        </div>
+                        <p className="patient-result-card__orientation">{resultado.orientacao}</p>
+                      </div>
+                    ))}
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
       </div>
     </section>
   );

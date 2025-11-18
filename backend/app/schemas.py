@@ -158,6 +158,28 @@ class PatientDashboardResponse(BaseModel):
     cards: List[PatientDashboardCard]
     transparencia_ibge: List[str]
 
+
+class ResponsibleTestResult(BaseModel):
+    teste_tipo: str
+    data: datetime
+    risco: str
+    score: int
+    faixa_etaria: str
+    regiao_geografica: str
+    orientacao: str
+
+
+class ResponsiblePatientResult(BaseModel):
+    nome: str
+    cpf: str
+    regiao_bairro: str
+    resultados: List[ResponsibleTestResult]
+
+
+class ResponsibleDashboardResponse(BaseModel):
+    pacientes: List[ResponsiblePatientResult]
+
+
 class IndigenousAutismStatisticBase(BaseModel):
     location: str
     indigenous_population: int

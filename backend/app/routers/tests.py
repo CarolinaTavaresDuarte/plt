@@ -144,6 +144,61 @@ def get_patient_dashboard(
     )
 
 
+@router.get("/responsavel/resultados", response_model=schemas.ResponsibleDashboardResponse)
+def get_responsavel_results(
+    db: Session = Depends(get_db),
+    current_user: models.UserAccount = Depends(require_role("responsavel")),
+):
+    resultados = (
+        db.query(models.TestResult)
+        .join(models.TestResult.testado)
+        .filter(models.TestResult.usuario_id == current_user.id)
+        .order_by(models.TestResult.criado_em.desc())
+        .all()
+    )
+
+    agrupado: dict[int, dict] = {}
+    for resultado in resultados:
+        testado = resultado.testado
+        if not testado:
+            continue
+        grupo = agrupado.setdefault(
+            testado.id,
+            {
+                "nome": testado.nome_completo,
+                "cpf": testado.documento_cpf,
+                "regiao_bairro": testado.regiao_bairro,
+                "resultados": [],
+            },
+        )
+        grupo["resultados"].append(
+            {
+                "teste_tipo": resultado.teste_tipo,
+                "data": resultado.criado_em,
+                "risco": resultado.classificacao,
+                "score": resultado.score,
+                "faixa_etaria": resultado.faixa_etaria,
+                "regiao_geografica": resultado.regiao_geografica,
+                "orientacao": classify_orientation(resultado.classificacao, resultado.teste_tipo),
+            }
+        )
+
+    pacientes = [
+        schemas.ResponsiblePatientResult(
+            nome=valor["nome"],
+            cpf=valor["cpf"],
+            regiao_bairro=valor["regiao_bairro"],
+            resultados=[
+                schemas.ResponsibleTestResult(**res)
+                for res in valor["resultados"]
+            ],
+        )
+        for valor in agrupado.values()
+    ]
+
+    return schemas.ResponsibleDashboardResponse(pacientes=pacientes)
+
+
 @router.get("/especialista/dashboard", response_model=schemas.SpecialistDashboardResponse)
 def get_specialist_dashboard(
     db: Session = Depends(get_db),

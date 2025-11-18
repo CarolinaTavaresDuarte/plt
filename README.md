@@ -67,6 +67,7 @@ O backend cria automaticamente os esquemas e tabelas necessários no PostgreSQL 
 cd frontend
 npm install
 npm i react-router-dom
+npm install d3 topojson-client
 npm run dev
 ```
 

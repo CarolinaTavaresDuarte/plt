@@ -310,3 +310,7 @@ class IBGEStudentAutismByRaceBase(BaseModel):
 class IBGEStudentAutismByRaceResponse(IBGEStudentAutismByRaceBase):
     id: int
     model_config = ConfigDict(from_attributes=True)
+
+class IndigenousAutismSummary(BaseModel):
+    total_population: int
+    total_autism_cases: int

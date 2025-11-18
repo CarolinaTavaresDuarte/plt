@@ -1,3 +1,4 @@
+# Processa e importa dados brutos do Excel do IBGE para o DB 
 import pandas as pd
 from sqlalchemy.orm import Session
 from app.models import IndigenousAutismStatistic

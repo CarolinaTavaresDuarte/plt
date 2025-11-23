@@ -5,4 +5,4 @@ from .core import (
 )
 from .ibge_importer import import_ibge_autism_file
 from .ibge_analytics import get_indigenous_autism_summary
-
+from .ibge_resident_autism_sex import get_resident_gender_autism_distribution

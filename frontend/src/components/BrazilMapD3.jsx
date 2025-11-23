@@ -7,30 +7,30 @@ const height = 500;
 
 // Configuração da projeção (centrada no Brasil)
 const projection = d3.geoMercator()
-  .scale(650) // Escala ajustada
-  .center([-52, -15])
-  .translate([width / 2, height / 2]);
+  .scale(650) // Escala ajustada
+  .center([-52, -15])
+  .translate([width / 2, height / 2]);
 
 const path = d3.geoPath()
-  .projection(projection);
+  .projection(projection);
 
 // Cria uma escala de cores D3 (Amarelo para Baixo, Vermelho para Alto)
 const colorScale = d3.scaleQuantize()
-  .domain([0, 3]) 
-  .range(d3.schemeReds[5]); 
+  .domain([0, 3]) 
+  .range(d3.schemeReds[5]); 
 
 // --- FUNÇÃO DE NORMALIZAÇÃO (CRUCIAL PARA OS NOMES BATEREM) ---
 // Remove acentos, espaços extras e coloca tudo em minúsculo
 // Ex: "São Paulo" -> "sao paulo"
 // Ex: "Ceará" -> "ceara"
 const normalizeName = (name) => {
-    if (!name) return "";
-    return name
-        .toString()
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .trim();
+    if (!name) return "";
+    return name
+        .toString()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim();
 };
 
 // --- Função para Remover o Tooltip ---
@@ -144,5 +144,5 @@ export default function BrazilMapD3({ ibgeData, geoData }) {
         Passe o mouse sobre os estados para ver o percentual.
       </p>
     </div>
-  );
+ );
 }

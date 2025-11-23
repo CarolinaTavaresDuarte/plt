@@ -1,4 +1,3 @@
-// Código que vai exibir os dados do DB de forma personalizada
 import React, { useState, useEffect } from "react";
 import { useApi } from "../hooks/useApi"; 
 import BrazilMapD3 from './BrazilMapD3'; 
@@ -54,12 +53,21 @@ export default function DadosDashboard() {
         setIbgeData(filteredForMapAndTable); 
         
         // 2. BUSCA O MAPA DO BRASIL (GeoJSON Online)
-        const geoResponse = await fetch('https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/brazil-states.geojson');
-        
-        if (!geoResponse.ok) throw new Error(`Falha ao baixar o mapa: ${geoResponse.statusText}`);
-        
+        //const geoResponse = await fetch('https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/brazil-states.geojson');
+        //const geoResponse = await fetch('/brazil-states.geojson');
+       // 2. BUSCA O MAPA DO BRASIL (GeoJSON LOCAL)
+        const geoResponse = await fetch('/brazil-states.geojson');
+
+        if (!geoResponse.ok) {
+            throw new Error(`Falha ao baixar o mapa: ${geoResponse.statusText}`);
+        }
+
         const mapJson = await geoResponse.json();
-        if (mapJson && mapJson.features) setGeoData(mapJson.features); 
+
+        if (mapJson && mapJson.features) {
+            setGeoData(mapJson.features);
+        }
+
 
       } catch (e) {
         console.error("Erro no Dashboard:", e);

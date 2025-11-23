@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import * as d3 from 'd3';
 
-// Definições de tamanho
+// Definições de tamanho fixas
 const width = 300;
 const height = 300;
 const radius = Math.min(width, height) / 2;
@@ -9,82 +9,87 @@ const radius = Math.min(width, height) / 2;
 export default function GenderPieChart({ malePercentage, femalePercentage }) {
     const svgRef = useRef(null);
 
-    // Estrutura de dados para o D3 Pie Layout
-    const data = [
-        { label: 'Homens', value: malePercentage || 0, color: '#DC3545' }, // Vermelho/Laranja (Alto)
-        { label: 'Mulheres', value: femalePercentage || 0, color: '#007BFF' } // Azul (Baixo)
-    ];
-
     useEffect(() => {
+        // CORREÇÃO: A array 'data' PRECISA SER DEFINIDA AQUI DENTRO, 
+        // para que use os valores atualizados das props.
+        const data = [
+            { label: 'Homens', value: malePercentage || 0, color: '#DC3545' }, 
+            { label: 'Mulheres', value: femalePercentage || 0, color: '#007BFF' } 
+        ];
+
         // Checagem de segurança
         if (!svgRef.current) return;
-
-        // Limpa o SVG anterior
+        
+        // Limpa o SVG anterior para evitar duplicidade em re-renderizações
         d3.select(svgRef.current).selectAll("*").remove();
 
+        // Configuração do SVG
         const svg = d3.select(svgRef.current)
             .attr("width", width)
             .attr("height", height)
             .append("g")
             // Move o centro para o meio do SVG
-            .attr("transform", `translate(${width / 2}, ${height / 2})`);
+            .attr("transform", `translate(${width / 2},${height / 2})`);
 
-        // 1. O Gerador de Pie: Define como os dados serão transformados em arcos
+        // Gerador de Pie e Arco
         const pie = d3.pie()
-            .value(d => d.value) // Usa o campo 'value' (a porcentagem)
-            .sort(null); // Não ordena os dados
+            .value(d => d.value)
+            .sort(null); 
 
-        // 2. O Gerador de Arco: Desenha o caminho SVG do arco
         const arc = d3.arc()
-            .innerRadius(0) // Gráfico de Pizza (Não Donut)
-            .outerRadius(radius * 0.8); // 80% do raio para deixar margem
-
-        // 3. O Gerador de Arco Externo para Rótulos
-        const outerArc = d3.arc()
-            .innerRadius(radius * 0.9)
-            .outerRadius(radius * 0.9);
-
-        // Gera os arcos (paths) a partir dos dados formatados pelo pie()
-        const arcs = pie(data);
+            .innerRadius(0)
+            .outerRadius(radius * 0.8); // Ajuste para dar espaço para a legenda
 
         // Desenho dos arcos
-        svg.selectAll('allSlices')
-            .data(arcs)
+        const arcs = svg.selectAll("arc")
+            .data(pie(data))
             .enter()
-            .append('path')
-            .attr('d', arc)
-            .attr('fill', (d, i) => data[i].color)
+            .append("g")
+            .attr("class", "arc");
+
+        arcs.append("path")
+            .attr("d", arc)
+            .attr("fill", d => d.data.color)
             .attr("stroke", "white")
-            .style("stroke-width", "2px")
-            .style("opacity", 0.9);
+            .style("stroke-width", "2px");
 
-        // Adiciona os rótulos de porcentagem dentro do arco
-        svg.selectAll('allLabels')
-            .data(arcs)
+        // Adiciona os rótulos de porcentagem no centro do arco
+        arcs.append("text")
+            .attr("transform", d => `translate(${arc.centroid(d)})`)
+            .attr("text-anchor", "middle")
+            .style("font-size", "12px")
+            .style("fill", "#fff") 
+            .style("font-weight", "bold")
+            .text(d => d.data.value > 0 ? `${d.data.value.toFixed(1)}%` : '');
+
+        // Adicionando legendas (fora do arco)
+        const legend = svg.selectAll(".legend")
+            .data(data)
             .enter()
-            .append('text')
-            .text(d => {
-                // Exibe o valor apenas se for significativo
-                return d.data.value > 0 ? `${d.data.label}: ${d.data.value.toFixed(1)}%` : '';
-            })
-            .attr('transform', d => {
-                // Coloca o texto no centro do arco
-                const pos = arc.centroid(d);
-                return `translate(${pos})`;
-            })
-            .style("text-anchor", "middle")
-            .style("font-size", "14px")
-            .style("fill", "white")
-            .style("font-weight", "bold");
+            .append("g")
+            .attr("class", "legend")
+            .attr("transform", (d, i) => `translate(${radius * 0.85}, ${-radius * 0.8 + i * 20})`); // Posição à direita
 
-    }, [malePercentage, femalePercentage]); // Refaz o gráfico se as porcentagens mudarem
+        legend.append("rect")
+            .attr("x", 0)
+            .attr("width", 12)
+            .attr("height", 12)
+            .style("fill", d => d.color);
+
+        legend.append("text")
+            .attr("x", 18)
+            .attr("y", 6)
+            .attr("dy", ".35em")
+            .style("text-anchor", "start")
+            .style("font-size", "12px")
+            .style("fill", "#333")
+            .text(d => d.label);
+
+    }, [malePercentage, femalePercentage]); 
 
     return (
-        <div style={{ margin: '20px', textAlign: 'center' }}>
-            <h3 style={{ marginBottom: '15px' }}>
-                <span role="img" aria-label="Gênero">👨‍🦱👩‍🦱</span> Distribuição de Casos por Sexo
-            </h3>
-            <div style={{ display: 'inline-block', border: '1px solid #ddd', borderRadius: '8px', padding: '10px' }}>
+        <div style={{ margin: '0 auto', textAlign: 'center' }}>
+            <div style={{ display: 'inline-block' }}>
                 <svg ref={svgRef}></svg>
             </div>
             <p style={{ fontSize: '12px', color: '#6c757d', marginTop: '10px' }}>

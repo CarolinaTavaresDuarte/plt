@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useApi } from "../hooks/useApi"; 
 import BrazilMapD3 from './BrazilMapD3'; 
 import GenderPieChart from './GenderPieChart';
+import EthnicityBars from './EthnicityBars';  // Certifique-se de que o caminho esteja correto
 
 // Componente para exibir os totais em destaque
 const TotalKpiCard = ({ title, value, unit, color }) => (
@@ -21,7 +22,6 @@ const TotalKpiCard = ({ title, value, unit, color }) => (
     </div>
 );
 
-
 export default function DadosDashboard() {
   const { get } = useApi(); 
   const [loading, setLoading] = useState(true);
@@ -32,6 +32,15 @@ export default function DadosDashboard() {
   const [brasilData, setBrasilData] = useState(null); // Dados totais do Brasil
   const [genderData, setGenderData] = useState({ male_percentage: 0, female_percentage: 0 }); // Dados de gênero
   const [searchTerm, setSearchTerm] = useState(""); 
+  const [ethnicityData, setEthnicityData] = useState([]); // Dados de etnia
+
+  const processEthnicityData = (data) => {
+  return data.map(d => ({
+    race: d.race, // Nome da etnia
+    total: parseFloat(d.pretotal) || 0, // Garantir que é um número
+    autismo: parseFloat(d.aut_pretotal) || 0, // Garantir que é um número
+  }));
+};
 
   useEffect(() => {
     const fetchData = async () => {
@@ -55,10 +64,15 @@ export default function DadosDashboard() {
         
         // 2. BUSCA OS DADOS DE GÊNERO
         const genderDataRaw = await get("/api/v1/ibge/resident_gender_distribution");
-        console.log(genderDataRaw.data);  // Verifique os dados retornados
         setGenderData(genderDataRaw.data); // Armazena os dados de gênero
 
-        // 3. BUSCA O MAPA DO BRASIL (GeoJSON LOCAL)
+        // 3. BUSCA OS DADOS POR ETNIA
+        const ethnicityDataRaw = await get("/api/v1/ibge/students-autism-by-race");
+        
+        setEthnicityData(ethnicityDataRaw.data[0]); // Armazena os dados de etnia
+        console.log("Dados processados para o gráfico de barras:", ethnicityDataRaw.data);
+
+        // 4. BUSCA O MAPA DO BRASIL (GeoJSON LOCAL)
         const geoResponse = await fetch('/brazil-states.geojson');
 
         if (!geoResponse.ok) {
@@ -136,7 +150,7 @@ export default function DadosDashboard() {
           )}
         </div>
 
-        {/* DIREITA: Painel de Busca e Tabela */}
+        {/* DIREITA: Barra de Pesquisa */}
         <div style={{ flex: '1', minWidth: '300px' }}>
             {/* Barra de Pesquisa */}
             <div style={{ marginBottom: '15px' }}>
@@ -197,22 +211,43 @@ export default function DadosDashboard() {
             <div style={{ marginTop: '10px', fontSize: '12px', color: '#888', textAlign: 'right' }}>
                 Mostrando {filteredData.length} estados (UFs).
             </div>
-                
-            {genderData && (
-                <div style={{ border: '1px solid #eee', borderRadius: '8px', padding: '20px' }}>
-                    <h3 style={{ textAlign: 'center', marginBottom: '15px', color: '#444', fontSize: '16px' }}>
-                        Distribuição Percentual de Casos de TEA por Sexo (IBGE - 2022)
-                    </h3>
-                    <div style={{ display: 'flex', justifyContent: 'center' }}>
-                        <GenderPieChart 
-                            malePercentage={genderData.male_percentage} 
-                            femalePercentage={genderData.female_percentage} 
-                        />
-                    </div>
-                </div>
-            )}
         </div>
       </div>
+
+      {/* NOVA LINHA: Gráficos abaixo do Mapa e da Barra de Pesquisa */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '30px', alignItems: 'flex-start', marginTop: '40px' }}>
+
+    {/* Gráfico de Barras Duplas à Esquerda */}
+    <div style={{ flex: '1', minWidth: '300px', marginTop: '40px' }}>
+        {/* Título do Gráfico de Barras */}
+        <div style={{ border: '1px solid #eee', borderRadius: '8px', padding: '20px' }}>
+            <h3 style={{ textAlign: 'center', marginBottom: '15px', color: '#444', fontSize: '16px' }}>
+                Distribuição Percentual de Casos de TEA por Raça (IBGE - 2022)
+            </h3>
+        </div>
+
+        {/* Gráfico de Barras */}
+        <EthnicityBars data={ethnicityData} width={600} height={300} /> 
+    </div>
+
+    {/* Gráfico de Pizza à Direita */}
+    <div style={{ flex: '1', minWidth: '300px', marginTop: '40px' }}>
+        {genderData && (
+            <div style={{ border: '1px solid #eee', borderRadius: '8px', padding: '20px' }}>
+                <h3 style={{ textAlign: 'center', marginBottom: '15px', color: '#444', fontSize: '16px' }}>
+                    Distribuição Percentual de Casos de TEA por Sexo (IBGE - 2022)
+                </h3>
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                    <GenderPieChart 
+                        malePercentage={genderData.male_percentage} 
+                        femalePercentage={genderData.female_percentage} 
+                    />
+                </div>
+            </div>
+        )}
+    </div>
+
+</div>
     </div>
   );
 }

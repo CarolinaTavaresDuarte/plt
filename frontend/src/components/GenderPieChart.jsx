@@ -6,26 +6,31 @@ const width = 300;
 const height = 300;
 const radius = Math.min(width, height) / 2;
 
-export default function GenderPieChart({ male_percentage, female_percentage }) {
+// Melhoria: Usando convenção de PascalCase para props (MalePercentage)
+export default function GenderPieChart({ malePercentage, femalePercentage }) {
     const svgRef = useRef(null);
 
     useEffect(() => {
-        console.log('Dados do gráfico de gênero:', male_percentage, female_percentage);
+        
         // CHECAGEM DE SEGURANÇA
-        if (!male_percentage || !female_percentage) return;
+        if (!malePercentage || !femalePercentage) return;
 
-        // Configuração do SVG
-        const svg = d3.select(svgRef.current)
-            .attr("width", width)
-            .attr("height", height)
-            .append("g")
-            .attr("transform", `translate(${width / 2},${height / 2})`);
+        // Limpa o SVG anterior
+        d3.select(svgRef.current).selectAll("*").remove();
 
         // Definição dos dados
         const data = [
-            { label: 'Homens', value: male_percentage, color: '#DC3545' },
-            { label: 'Mulheres', value: female_percentage, color: '#007BFF' }
+            { label: 'Homens', value: malePercentage, color: '#DC3545' }, // 59.9% (Vermelho)
+            { label: 'Mulheres', value: femalePercentage, color: '#007BFF' } // 40.1% (Azul)
         ];
+
+        // Configuração do SVG
+        const svg = d3.select(svgRef.current)
+            .attr("width", width * 1.5) // Aumenta a largura total para caber a legenda
+            .attr("height", height)
+            .append("g")
+            // Move o centro para a ESQUERDA para dar espaço à legenda à direita
+            .attr("transform", `translate(${width / 2},${height / 2})`);
 
         // Gerador de pie e arco
         const pie = d3.pie()
@@ -56,7 +61,7 @@ export default function GenderPieChart({ male_percentage, female_percentage }) {
             .style("font-size", "12px")
             .style("fill", "#fff")
             .style("font-weight", "bold")
-            .text(d => d.data.value > 0 ? `${d.data.value.toFixed(1)}%` : 'Sem Dados');
+            .text(d => d.data.value > 0 ? `${d.data.value.toFixed(1)}%` : '0%'); // Exibir 0% em vez de "Sem Dados"
 
         // Adicionando legendas (fora do arco)
         const legend = svg.selectAll(".legend")
@@ -64,7 +69,8 @@ export default function GenderPieChart({ male_percentage, female_percentage }) {
             .enter()
             .append("g")
             .attr("class", "legend")
-            .attr("transform", (d, i) => `translate(${radius * 0.85}, ${-radius * 0.8 + i * 20})`); // Posição à direita
+            // POSIÇÃO CORRIGIDA: Move a legenda para a direita do centro do gráfico
+            .attr("transform", (d, i) => `translate(${radius + 20}, ${-radius * 0.4 + i * 20})`);
 
         legend.append("rect")
             .attr("x", 0)
@@ -81,11 +87,12 @@ export default function GenderPieChart({ male_percentage, female_percentage }) {
             .style("fill", "#333")
             .text(d => d.label);
 
-    }, [male_percentage, female_percentage]); 
+    }, [malePercentage, femalePercentage]); 
 
     return (
         <div style={{ margin: '0 auto', textAlign: 'center' }}>
             <div style={{ display: 'inline-block' }}>
+                {/* SVG renderiza o gráfico e a legenda */}
                 <svg ref={svgRef}></svg>
             </div>
             <p style={{ fontSize: '12px', color: '#6c757d', marginTop: '10px' }}>

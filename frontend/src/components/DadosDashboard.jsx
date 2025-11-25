@@ -158,14 +158,6 @@ export default function DadosDashboard() {
                 />
             </div>
 
-            {/* Gráfico de Pizza de Gênero */}
-            <div style={{ marginBottom: '30px' }}>
-                <GenderPieChart 
-                    male_percentage={genderData.male_percentage} 
-                    female_percentage={genderData.female_percentage} 
-                />
-            </div>
-
             {/* Tabela com Scroll */}
             <div style={{ maxHeight: '500px', overflowY: 'auto', border: '1px solid #e0e0e0', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
                 {filteredData.length > 0 ? (
@@ -205,6 +197,20 @@ export default function DadosDashboard() {
             <div style={{ marginTop: '10px', fontSize: '12px', color: '#888', textAlign: 'right' }}>
                 Mostrando {filteredData.length} estados (UFs).
             </div>
+                
+            {genderData && (
+                <div style={{ border: '1px solid #eee', borderRadius: '8px', padding: '20px' }}>
+                    <h3 style={{ textAlign: 'center', marginBottom: '15px', color: '#444', fontSize: '16px' }}>
+                        Distribuição Percentual de Casos de TEA por Sexo (IBGE - 2022)
+                    </h3>
+                    <div style={{ display: 'flex', justifyContent: 'center' }}>
+                        <GenderPieChart 
+                            malePercentage={genderData.male_percentage} 
+                            femalePercentage={genderData.female_percentage} 
+                        />
+                    </div>
+                </div>
+            )}
         </div>
       </div>
     </div>

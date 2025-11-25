@@ -49,6 +49,37 @@ const RISK_BADGES = {
   Baixo: { color: '#0e7a4b', background: 'rgba(46,169,125,.16)', borderColor: 'rgba(46,169,125,.35)' },
 };
 
+const RISK_GUIDANCE = {
+  Alto: {
+    highlight: 'RISCO ALTO - Avaliacao Diagnostica Urgente Recomendada',
+    body: 'Sua pontuacao na triagem indica um Risco Alto para sinais associados ao Transtorno do Espectro Autista (TEA). E fundamental que seja realizada uma Avaliacao Diagnostica Multidisciplinar completa com profissionais especializados o mais breve possivel. Reforcamos que esta triagem NAO e um diagnostico, mas um indicativo que exige atencao imediata.',
+    steps: [
+      'Proximidade: Entraremos em contato (por telefone ou WhatsApp) em ate 24 horas uteis para oferecer suporte e orientar o agendamento da avaliacao diagnostica com nossa equipe.',
+      'Acelere: Se preferir, entre em contato conosco imediatamente para iniciar o processo sem espera.',
+    ],
+    cta: { label: 'Contato', href: 'https://wa.me/' },
+  },
+  Moderado: {
+    highlight: 'RISCO MODERADO - Requer Acompanhamento e Avaliacao Complementar',
+    body: 'O resultado da triagem aponta para um Risco Moderado para sinais associados ao TEA. Recomendamos que seja feita uma avaliacao complementar e um monitoramento ativo do desenvolvimento da crianca. Muitos casos de risco moderado podem ser esclarecidos com uma observacao mais aprofundada.',
+    steps: [
+      'Monitoramento Ativo: Nossa equipe entrara em contato em ate 48 horas uteis para agendar uma consulta de orientacao a fim de definir se e necessario iniciar uma avaliacao diagnostica ou se apenas o monitoramento trimestral sera suficiente no momento.',
+      'Duvidas: Nao hesite em nos contatar se houverem alteracoes no comportamento ou novas preocupacoes.',
+    ],
+    cta: { label: 'Contato', href: 'https://wa.me/' },
+  },
+  Baixo: {
+    highlight: 'RISCO BAIXO - Sem Sinais Consistentes no Momento',
+    body: 'Sua pontuacao indica um Risco Baixo para sinais associados ao TEA. Isso significa que, no momento, nao foram identificados sinais consistentes que justifiquem uma avaliacao diagnostica. Este e um resultado tranquilizador!',
+    steps: [
+      'Vigilancia: Continue a monitorar o desenvolvimento da crianca e siga com as consultas de rotina (pediatra/neurologista).',
+      'Acompanhamento: Nossa equipe fara um contato de rotina em 6 meses para uma nova verificacao, de acordo com o protocolo de desenvolvimento infantil.',
+      'Alerta: Se, no futuro, surgirem novas preocupacoes com o desenvolvimento da crianca, entre em contato imediatamente.',
+    ],
+    cta: { label: 'Contato', href: 'https://wa.me/' },
+  },
+};
+
 const getRiskStyle = (level) => ({
   color: RISK_BADGES[level]?.color || '#0f172a',
   background: RISK_BADGES[level]?.background || 'rgba(15,23,42,.08)',
@@ -486,6 +517,7 @@ export function PatientDashboard() {
   const [pacientes, setPacientes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [contactModal, setContactModal] = useState({ open: false, context: null });
 
   useEffect(() => {
     let active = true;
@@ -498,7 +530,7 @@ export function PatientDashboard() {
         setError(null);
       } catch (err) {
         if (!active) return;
-        setError('Não foi possível carregar seus resultados agora.');
+        setError('Nao foi possivel carregar seus resultados agora.');
       } finally {
         if (active) setLoading(false);
       }
@@ -512,14 +544,14 @@ export function PatientDashboard() {
     <section className="section" id="patient-dashboard">
       <div className="container">
         <h2 className="section-title">Meus resultados</h2>
-        <p className="section-subtitle">Acompanhe suas triagens e orientações personalizadas.</p>
+        <p className="section-subtitle">Acompanhe suas triagens e orientacoes personalizadas.</p>
 
         {loading && <div className="card">Carregando seus resultados...</div>}
         {error && <div className="alert alert-error">{error}</div>}
 
         {!loading && !error && pacientes.length === 0 && (
           <div className="card">
-            Você ainda não finalizou nenhuma triagem. Assim que concluir um teste, os resultados aparecerão aqui.
+            Voce ainda nao finalizou nenhuma triagem. Assim que concluir um teste, os resultados aparecerao aqui.
           </div>
         )}
 
@@ -534,7 +566,7 @@ export function PatientDashboard() {
                       <h3>{paciente.nome}</h3>
                       <p>
                         {formatCpf(paciente.cpf)}
-                        {paciente.regiao_bairro ? ` · ${paciente.regiao_bairro}` : ''}
+                        {paciente.regiao_bairro ? ` - ${paciente.regiao_bairro}` : ''}
                       </p>
                     </div>
                     {latest && (
@@ -545,23 +577,60 @@ export function PatientDashboard() {
                   </header>
 
                   <div className="patient-result-card__body">
-                    {paciente.resultados.map((resultado, idx) => (
-                      <div key={`${paciente.cpf}-${resultado.teste_tipo}-${idx}`} className="patient-result-card__entry">
-                        <div className="patient-result-card__entry-head">
-                          <div>
-                            <strong>{getTestLabel(resultado.teste_tipo)}</strong>
-                            <small>
-                              {formatDateLabel(resultado.data)}
-                              {typeof resultado.score === 'number' ? ` · Score ${resultado.score}` : ''}
-                            </small>
+                    {paciente.resultados.map((resultado, idx) => {
+                      const guidance = RISK_GUIDANCE[resultado.risco];
+                      const extraNote = (resultado.orientacao || '').trim();
+                      const riskStyle = getRiskStyle(resultado.risco);
+
+                      return (
+                        <div key={`${paciente.cpf}-${resultado.teste_tipo}-${idx}`} className="patient-result-card__entry">
+                          <div className="patient-result-card__entry-head">
+                            <div>
+                              <strong>{getTestLabel(resultado.teste_tipo)}</strong>
+                              <small>
+                                {formatDateLabel(resultado.data)}
+                                {typeof resultado.score === 'number' ? ` - Score ${resultado.score}` : ''}
+                              </small>
+                            </div>
                           </div>
-                          <span className="risk-pill" style={getRiskStyle(resultado.risco)}>
-                            {resultado.risco}
-                          </span>
+
+                          {guidance ? (
+                            <div
+                              className="patient-result-card__guidance"
+                              style={{ borderColor: riskStyle.borderColor, background: 'linear-gradient(180deg, #fff 0%, #f9fafb 100%)' }}
+                            >
+                              <div className="patient-result-card__guidance-label" style={{ color: riskStyle.color }}>
+                                {guidance.highlight}
+                              </div>
+                              <p className="patient-result-card__orientation">{guidance.body}</p>
+                              <ul className="patient-result-card__steps">
+                                {guidance.steps.map((step) => (
+                                  <li key={step}>{step}</li>
+                                ))}
+                              </ul>
+                              {guidance.cta && (
+                                <button
+                                  type="button"
+                                  className="btn btn-primary"
+                                  onClick={() => setContactModal({
+                                    open: true,
+                                    context: {
+                                      patientName: paciente.nome,
+                                      testName: getTestLabel(resultado.teste_tipo),
+                                      riskLevel: resultado.risco,
+                                    },
+                                  })}
+                                >
+                                  {guidance.cta.label}
+                                </button>
+                              )}
+                            </div>
+                          ) : (
+                            extraNote && <p className="patient-result-card__orientation">{extraNote}</p>
+                          )}
                         </div>
-                        <p className="patient-result-card__orientation">{resultado.orientacao}</p>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </article>
               );
@@ -569,8 +638,108 @@ export function PatientDashboard() {
           </div>
         )}
       </div>
+      {contactModal.open && (
+        <ContactModal
+          context={contactModal.context}
+          onClose={() => setContactModal({ open: false, context: null })}
+        />
+      )}
     </section>
   );
 }
+
+const ContactModal = ({ context, onClose }) => {
+  const modalId = 'contact-modal-title';
+  const defaultMessage = `Ola, equipe PLATAA! Recebi um resultado de risco ${context?.riskLevel || ''} no teste ${context?.testName || ''} e gostaria de avancar com atendimento.`.trim();
+  const [sending, setSending] = useState(false);
+  const [feedback, setFeedback] = useState({ type: '', message: '' });
+  const API_BASE = import.meta.env?.VITE_API_URL || window.location.origin;
+
+  useEffect(() => {
+    const onKey = (e) => e.key === 'Escape' && onClose();
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  if (!context) return null;
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const payload = {
+      nome: form.nome.value,
+      email: form.email.value,
+      mensagem: form.mensagem.value,
+    };
+    setSending(true);
+    setFeedback({ type: '', message: '' });
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/contact/send`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      setFeedback({ type: 'success', message: 'Mensagem enviada! Voce recebera um e-mail de confirmacao.' });
+      form.reset();
+    } catch (err) {
+      setFeedback({ type: 'error', message: 'Nao foi possivel enviar agora. Tente novamente em instantes.' });
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <div role="dialog" aria-modal="true" aria-labelledby={modalId} className="ui-modal">
+      <div className="ui-modal__backdrop" onClick={onClose} aria-hidden="true" />
+      <div className="ui-modal__card" role="document">
+        <header className="ui-modal__header">
+          <h3 id={modalId} className="ui-modal__title">
+            Fale com a equipe
+          </h3>
+        </header>
+        <div className="ui-modal__body prose">
+          <p>
+            Preencha seus dados e nossa equipe entrara em contato.
+          </p>
+          <form className="contact-modal__form" onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label htmlFor="contact-nome">Nome</label>
+              <input id="contact-nome" name="nome" type="text" required />
+            </div>
+            <div className="form-group">
+              <label htmlFor="contact-email">E-mail</label>
+              <input id="contact-email" name="email" type="email" required />
+            </div>
+            <div className="form-group">
+              <label htmlFor="contact-mensagem">Mensagem</label>
+              <textarea
+                id="contact-mensagem"
+                name="mensagem"
+                rows="4"
+                defaultValue={defaultMessage}
+                required
+              />
+            </div>
+            <input type="hidden" name="contexto" value={`${context?.patientName || ''} - ${context?.testName || ''} - ${context?.riskLevel || ''}`} />
+            {feedback.message && (
+              <div className={`alert ${feedback.type === 'success' ? 'alert-success' : 'alert-error'}`} style={{ margin: '0.5rem 0' }}>
+                {feedback.message}
+              </div>
+            )}
+            <div className="ui-modal__footer" style={{ justifyContent: 'space-between', padding: 0, paddingTop: '1rem' }}>
+              <button type="button" className="btn btn-outline" onClick={onClose} disabled={sending}>
+                Cancelar
+              </button>
+              <button type="submit" className="btn btn-primary" disabled={sending}>
+                {sending ? 'Enviando...' : 'Enviar contato'}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default Charts;

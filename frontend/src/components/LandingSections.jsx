@@ -632,7 +632,7 @@ export const ContactSection = () => (
 export const Footer = () => (
   <footer className="footer">
     <div className="container" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      <p>© 2024 PLATAA. Plataforma de triagem e atendimento ao autista.</p>
+      <p>© 2025 PLATAA. Plataforma de triagem e atendimento ao autista.</p>
       <a href="https://plataa.example.com/politica" target="_blank" rel="noreferrer">
         Política de privacidade
       </a>

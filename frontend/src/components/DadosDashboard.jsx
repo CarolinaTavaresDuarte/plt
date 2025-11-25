@@ -30,6 +30,7 @@ export default function DadosDashboard() {
   const [geoData, setGeoData] = useState([]); 
   const [ibgeData, setIbgeData] = useState([]); // Dados de Região/UF
   const [brasilData, setBrasilData] = useState(null); // Dados totais do Brasil
+  const [genderData, setGenderData] = useState({ male_percentage: 0, female_percentage: 0 }); // Dados de gênero
   const [searchTerm, setSearchTerm] = useState(""); 
 
   useEffect(() => {
@@ -52,10 +53,12 @@ export default function DadosDashboard() {
 
         setIbgeData(filteredForMapAndTable); 
         
-        // 2. BUSCA O MAPA DO BRASIL (GeoJSON Online)
-        //const geoResponse = await fetch('https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/brazil-states.geojson');
-        //const geoResponse = await fetch('/brazil-states.geojson');
-       // 2. BUSCA O MAPA DO BRASIL (GeoJSON LOCAL)
+        // 2. BUSCA OS DADOS DE GÊNERO
+        const genderDataRaw = await get("/api/v1/ibge/resident_gender_distribution");
+        console.log(genderDataRaw.data);  // Verifique os dados retornados
+        setGenderData(genderDataRaw.data); // Armazena os dados de gênero
+
+        // 3. BUSCA O MAPA DO BRASIL (GeoJSON LOCAL)
         const geoResponse = await fetch('/brazil-states.geojson');
 
         if (!geoResponse.ok) {
@@ -67,7 +70,6 @@ export default function DadosDashboard() {
         if (mapJson && mapJson.features) {
             setGeoData(mapJson.features);
         }
-
 
       } catch (e) {
         console.error("Erro no Dashboard:", e);
@@ -81,7 +83,6 @@ export default function DadosDashboard() {
   }, [get]); 
 
   // --- LÓGICA DE FILTRO ---
-  // A busca agora só ocorre nos dados de Estado (ibgeData)
   const filteredData = ibgeData.filter(item => 
     item.location && item.location.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -94,7 +95,6 @@ export default function DadosDashboard() {
   const totalCasos = brasilData?.autism_count?.toLocaleString() || 'N/D';
   const totalPercentual = brasilData?.autism_percentage?.toFixed(2) || 'N/D';
 
-
   return (
     <div className="container section">
       <h2>Dashboard de Dados do IBGE</h2>
@@ -102,7 +102,7 @@ export default function DadosDashboard() {
           Análise do autismo na população indígena por Unidade Federativa.
       </p>
       
-        {/*Trecho com os totais destacados */}
+      {/*Totais em destaque*/}
       <div style={{ display: 'flex', gap: '20px', marginBottom: '30px' }}>
           <TotalKpiCard 
               title="População Indígena Total" 
@@ -124,7 +124,6 @@ export default function DadosDashboard() {
           />
       </div>
 
-
       {/* LAYOUT FLEXBOX */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '30px', alignItems: 'flex-start' }}>
         
@@ -139,7 +138,6 @@ export default function DadosDashboard() {
 
         {/* DIREITA: Painel de Busca e Tabela */}
         <div style={{ flex: '1', minWidth: '300px' }}>
-            
             {/* Barra de Pesquisa */}
             <div style={{ marginBottom: '15px' }}>
                 <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', fontSize: '14px' }}>
@@ -157,6 +155,14 @@ export default function DadosDashboard() {
                         border: '1px solid #ccc',
                         fontSize: '16px'
                     }}
+                />
+            </div>
+
+            {/* Gráfico de Pizza de Gênero */}
+            <div style={{ marginBottom: '30px' }}>
+                <GenderPieChart 
+                    male_percentage={genderData.male_percentage} 
+                    female_percentage={genderData.female_percentage} 
                 />
             </div>
 
@@ -200,7 +206,6 @@ export default function DadosDashboard() {
                 Mostrando {filteredData.length} estados (UFs).
             </div>
         </div>
-
       </div>
     </div>
   );

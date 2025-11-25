@@ -1,44 +1,40 @@
 import React, { useRef, useEffect } from 'react';
 import * as d3 from 'd3';
 
-// Definições de tamanho fixas
+// Define as dimensões do gráfico
 const width = 300;
 const height = 300;
 const radius = Math.min(width, height) / 2;
 
-export default function GenderPieChart({ malePercentage, femalePercentage }) {
+export default function GenderPieChart({ male_percentage, female_percentage }) {
     const svgRef = useRef(null);
 
     useEffect(() => {
-        // CORREÇÃO: A array 'data' PRECISA SER DEFINIDA AQUI DENTRO, 
-        // para que use os valores atualizados das props.
-        const data = [
-            { label: 'Homens', value: malePercentage || 0, color: '#DC3545' }, 
-            { label: 'Mulheres', value: femalePercentage || 0, color: '#007BFF' } 
-        ];
-
-        // Checagem de segurança
-        if (!svgRef.current) return;
-        
-        // Limpa o SVG anterior para evitar duplicidade em re-renderizações
-        d3.select(svgRef.current).selectAll("*").remove();
+        console.log('Dados do gráfico de gênero:', male_percentage, female_percentage);
+        // CHECAGEM DE SEGURANÇA
+        if (!male_percentage || !female_percentage) return;
 
         // Configuração do SVG
         const svg = d3.select(svgRef.current)
             .attr("width", width)
             .attr("height", height)
             .append("g")
-            // Move o centro para o meio do SVG
             .attr("transform", `translate(${width / 2},${height / 2})`);
 
-        // Gerador de Pie e Arco
+        // Definição dos dados
+        const data = [
+            { label: 'Homens', value: male_percentage, color: '#DC3545' },
+            { label: 'Mulheres', value: female_percentage, color: '#007BFF' }
+        ];
+
+        // Gerador de pie e arco
         const pie = d3.pie()
             .value(d => d.value)
-            .sort(null); 
+            .sort(null);
 
         const arc = d3.arc()
             .innerRadius(0)
-            .outerRadius(radius * 0.8); // Ajuste para dar espaço para a legenda
+            .outerRadius(radius * 0.8);
 
         // Desenho dos arcos
         const arcs = svg.selectAll("arc")
@@ -58,9 +54,9 @@ export default function GenderPieChart({ malePercentage, femalePercentage }) {
             .attr("transform", d => `translate(${arc.centroid(d)})`)
             .attr("text-anchor", "middle")
             .style("font-size", "12px")
-            .style("fill", "#fff") 
+            .style("fill", "#fff")
             .style("font-weight", "bold")
-            .text(d => d.data.value > 0 ? `${d.data.value.toFixed(1)}%` : '');
+            .text(d => d.data.value > 0 ? `${d.data.value.toFixed(1)}%` : 'Sem Dados');
 
         // Adicionando legendas (fora do arco)
         const legend = svg.selectAll(".legend")
@@ -85,7 +81,7 @@ export default function GenderPieChart({ malePercentage, femalePercentage }) {
             .style("fill", "#333")
             .text(d => d.label);
 
-    }, [malePercentage, femalePercentage]); 
+    }, [male_percentage, female_percentage]); 
 
     return (
         <div style={{ margin: '0 auto', textAlign: 'center' }}>

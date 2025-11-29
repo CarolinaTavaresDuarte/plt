@@ -183,37 +183,96 @@ function Charts({ data = [] }) {
     </div>
   );
 
-  // Trend line SVG points
+  // Trend by date as grouped bars with axis and safe labels
   function TrendChart({ items }) {
-    const w = 640; const h = 220; const pad = 24;
     if (!items || items.length === 0) {
-      return <div style={{ color: '#6b7280', padding: '16px 0' }}>Sem dados suficientes para mostrar a tendência.</div>;
+      return <div style={{ color: '#6b7280', padding: '16px 0' }}>Sem dados suficientes para mostrar a tendencia.</div>;
     }
-    const maxY = Math.max(1, ...items.map((d) => Math.max(d.total, d.alto)));
-    const step = items.length > 1 ? (w - pad * 2) / (items.length - 1) : 0;
-    const y = (v) => h - pad - ((h - pad * 2) * (v / maxY));
-    const x = (i) => pad + step * i;
-    const hasOne = items.length === 1;
-    const line = (key) => {
-      if (hasOne) {
-        const yv = y(items[0][key]);
-        return `${pad},${yv} ${w - pad},${yv}`; // linha horizontal para 1 ponto
-      }
-      return items.map((d, i) => `${x(i)},${y(d[key])}`).join(' ');
-    };
+    const rawMax = Math.max(1, ...items.map((d) => Math.max(d.total, d.alto)));
+    const niceMax = Math.max(1, Math.ceil(rawMax / 5) * 5);
+    const ticks = Array.from({ length: 5 }, (_, i) => Math.round((niceMax / 4) * (4 - i)));
+    const tickStep = Math.max(1, Math.floor(items.length / 10));
+    const chartHeight = 180;
+
     return (
-      <svg viewBox={`0 0 ${w} ${h}`} style={{ width: '100%', height: 260 }}>
-        <rect x="0" y="0" width={w} height={h} fill="#fff" />
-        <polyline fill="none" stroke="#dde3ea" strokeWidth="1" points={`${pad},${h - pad} ${w - pad},${h - pad}`} />
-        <polyline fill="none" stroke="#4e73df" strokeWidth="2" points={line('total')} />
-        <polyline fill="none" stroke={COLORS.Alto} strokeWidth="2" points={line('alto')} />
-        {hasOne && (
-          <>
-            <circle cx={(w) / 2} cy={y(items[0].total)} r="3" fill="#4e73df" />
-            <circle cx={(w) / 2} cy={y(items[0].alto)} r="3" fill={COLORS.Alto} />
-          </>
-        )}
-      </svg>
+      <div>
+        <div style={{ display: 'grid', gridTemplateColumns: '56px 1fr', alignItems: 'end', gap: 12 }}>
+          <div
+            style={{
+              height: chartHeight,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              alignItems: 'flex-end',
+              paddingRight: 4,
+              color: '#4b5563',
+              fontSize: 11,
+            }}
+          >
+            {ticks.map((t) => (
+              <div key={t}>{t}</div>
+            ))}
+          </div>
+
+          <div style={{ position: 'relative', overflowX: 'auto', paddingBottom: 12 }}>
+            <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+              {ticks.map((t) => {
+                const y = (1 - t / niceMax) * chartHeight;
+                return (
+                  <div
+                    key={`grid-${t}`}
+                    style={{
+                      position: 'absolute',
+                      left: 0,
+                      right: 0,
+                      top: y,
+                      borderTop: '1px solid #f2f4f7',
+                    }}
+                  />
+                );
+              })}
+            </div>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end', minHeight: chartHeight }}>
+              {items.map((d, idx) => (
+                <div key={d.date} style={{ minWidth: 56, textAlign: 'center' }}>
+                  <div style={{ display: 'flex', gap: 6, alignItems: 'flex-end', height: chartHeight - 28, justifyContent: 'center' }}>
+                    <div
+                      title={`Total: ${d.total}`}
+                      style={{ width: 14, height: 6 + ((chartHeight - 40) * (d.total / niceMax)), background: '#4e73df', borderRadius: 4 }}
+                    />
+                    <div
+                      title={`Alto: ${d.alto}`}
+                      style={{ width: 14, height: 6 + ((chartHeight - 40) * (d.alto / niceMax)), background: COLORS.Alto, borderRadius: 4 }}
+                    />
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 11,
+                      color: '#4b5563',
+                      marginTop: 6,
+                      whiteSpace: 'nowrap',
+                      display: idx % tickStep === 0 ? 'block' : 'none',
+                    }}
+                  >
+                    {new Date(d.date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center', color: '#4b5563', fontSize: 13, marginTop: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ width: 12, height: 12, background: '#4e73df', borderRadius: 3 }} />
+            <span>Total de casos</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ width: 12, height: 12, background: COLORS.Alto, borderRadius: 3 }} />
+            <span>Casos de alto risco</span>
+          </div>
+        </div>
+      </div>
     );
   }
 
@@ -318,6 +377,7 @@ export function SpecialistDashboard() {
   const [risco, setRisco] = useState('');
   const [inicio, setInicio] = useState('');
   const [fim, setFim] = useState('');
+  const [limit, setLimit] = useState('10');
 
   useEffect(() => {
     let alive = true;
@@ -374,6 +434,13 @@ export function SpecialistDashboard() {
     });
   }, [rows, bairro, teste, risco, inicio, fim]);
 
+  const displayRows = useMemo(() => {
+    if (limit === 'all') return filtered;
+    const n = Number(limit);
+    if (!Number.isFinite(n) || n <= 0) return filtered;
+    return filtered.slice(0, n);
+  }, [filtered, limit]);
+
   const totalCasos = totals.Alto + totals.Moderado + totals.Baixo;
 
   const thS = { textAlign: 'left', padding: '10px 12px', color: '#0f172a', fontWeight: 700 };
@@ -398,22 +465,24 @@ export function SpecialistDashboard() {
           const labelStyle = { color: '#5b6b88', fontWeight: 500 };
           const valueStyle = { fontSize: 30, fontWeight: 800, color: '#0f2454' };
           return (
-            <div className="grid" style={{ gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 16, marginBottom: 16 }}>
-              <div className="card" style={metricStyle}>
-                <div style={labelStyle}>Alto</div>
-                <div style={valueStyle}>{totals.Alto}</div>
-              </div>
-              <div className="card" style={metricStyle}>
-                <div style={labelStyle}>Moderado</div>
-                <div style={valueStyle}>{totals.Moderado}</div>
-              </div>
-              <div className="card" style={metricStyle}>
-                <div style={labelStyle}>Baixo</div>
-                <div style={valueStyle}>{totals.Baixo}</div>
-              </div>
-              <div className="card" style={metricStyle}>
-                <div style={labelStyle}>Total de casos</div>
-                <div style={valueStyle}>{totalCasos}</div>
+            <div className="card" style={{ marginBottom: 16 }}>
+              <div className="grid" style={{ gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 16 }}>
+                <div style={metricStyle}>
+                  <div style={labelStyle}>Alto</div>
+                  <div style={valueStyle}>{totals.Alto}</div>
+                </div>
+                <div style={metricStyle}>
+                  <div style={labelStyle}>Moderado</div>
+                  <div style={valueStyle}>{totals.Moderado}</div>
+                </div>
+                <div style={metricStyle}>
+                  <div style={labelStyle}>Baixo</div>
+                  <div style={valueStyle}>{totals.Baixo}</div>
+                </div>
+                <div style={metricStyle}>
+                  <div style={labelStyle}>Total de casos</div>
+                  <div style={valueStyle}>{totalCasos}</div>
+                </div>
               </div>
             </div>
           );
@@ -456,6 +525,15 @@ export function SpecialistDashboard() {
                 <option value="Baixo">Baixo</option>
               </select>
             </div>
+            <div>
+              <label>Mostrar</label>
+              <select value={limit} onChange={(e) => setLimit(e.target.value)}>
+                <option value="10">Top 10</option>
+                <option value="20">Top 20</option>
+                <option value="50">Top 50</option>
+                <option value="all">Todos</option>
+              </select>
+            </div>
           </div>
 
           <div style={{ marginTop: 16 }}>
@@ -484,7 +562,7 @@ export function SpecialistDashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((r, idx) => (
+                  {displayRows.map((r, idx) => (
                     <tr key={idx}>
                       <td style={tdS}>{r.nome}</td>
                       <td style={tdS}>{r.faixa_etaria}</td>
